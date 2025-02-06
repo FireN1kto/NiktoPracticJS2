@@ -1,14 +1,21 @@
 Vue.component('new-application', {
     template : `
     <div class="newApplication">
-        <h2>Начатые заявки</h2>
+        <h2>Новые заявки</h2>
         <div>
+            <createApplication @application-submitted="addApplication"></createApplication>
+            <Applications :applications="applications"></Applications>
         </div>
     </div>
     `,
     data() {
         return {
             applications: []
+        }
+    },
+    methods: {
+        addApplication(application){
+            this.applications.push(application)
         }
     }
 })
@@ -18,7 +25,7 @@ Vue.component('createApplication', {
     template: `
     <form class="application-form" @submit.prevent="onSubmit">
         <p>
-            <label for="application">Заявка:</label>
+            <label for="application">Название заявки:</label>
             <input id="application" v-model="name" placeholder="Пройти бося Оленя в Valheim">
         </p>
 
@@ -42,7 +49,7 @@ Vue.component('createApplication', {
     data () {
         return {
             name: null,
-            tasks: [],
+            tasks: "",
             errors: []
         }
     },
@@ -51,7 +58,7 @@ Vue.component('createApplication', {
             if(this.name && this.tasks) {
                 let application = {
                     name: this.name,
-                    tasks: this.tasks
+                    tasks: this.tasks.split('\n').filter(task => task.trim() !== '')
                 };
                 this.$emit('application-submitted', application)
                 this.name = null;
@@ -77,9 +84,11 @@ Vue.component('Applications', {
     <div class="application-div">
         <ul>
             <p v-if="!applications.length" class="noneApplications">Здесь ещё нет заявок.</p>
-            <div v-for="application in applications">
+            <div v-for="application in applications" :key="application.name">
                 <p class="applicationName">{{ application.name }}</p>
-                <li v-for="application.tasks in applications" :key="tasks">{{ tasks }}</li>
+                <ul>
+                    <li v-for="(task, index) in application.tasks" :key="index">{{ task }}</li>
+                </ul>
             </div>
         </ul>
     </div>
@@ -87,4 +96,6 @@ Vue.component('Applications', {
 })
 
 
-let app = new Vue ()
+let app = new Vue ({
+    el: '#app'
+})
