@@ -1,10 +1,11 @@
-Vue.component('new-application', {
+Vue.component('application', {
     template : `
     <div class="newApplication">
         <h2>Новые заявки</h2>
         <createApplication @application-submitted="addApplication"></createApplication>
         <Applications :applications="applications"></Applications>
     </div>
+
     `,
     data() {
         return {
@@ -13,7 +14,11 @@ Vue.component('new-application', {
     },
     methods: {
         addApplication(application){
-            this.applications.push(application)
+            if (this.applications.length < 3) {
+                this.applications.push(application);
+            } else {
+                alert("Достигнуто максимальное количество заявок!");
+            }
         }
     }
 })
@@ -54,17 +59,29 @@ Vue.component('createApplication', {
     methods: {
         onSubmit() {
             if(this.name && this.tasks) {
-                let application = {
-                    name: this.name,
-                    tasks: this.tasks.split(',').filter(task => task.trim() !== '')
-                };
-                this.$emit('application-submitted', application)
-                this.name = null;
-                this.tasks = [];
-                this.errors = [];
-            } else {
-                if(!this.name) this.errors.push("Требуется название!");
-                if(!this.tasks) this.errors.push("Требуются задачи!");
+                if (this.name && this.tasks) {
+                    let tasksArray = this.tasks.split(',').filter(task => task.trim() !== '');
+                
+                    if (tasksArray.length >= 3 && tasksArray.length <= 5) {
+                        let application = {
+                            name: this.name,
+                            tasks: tasksArray
+                        };
+                        this.$emit('application-submitted', application);
+                        this.name = null;
+                        this.tasks = "";
+                        this.errors = [];
+                    }else if (tasksArray.length < 3){
+                        if (!this.errors.includes("Слишком мало задач")) 
+                            this.errors.push("Слишком мало задач. Требуется не менее трёх.");
+                    }else {
+                        if (!this.errors.includes("Слишком много задач")) 
+                            this.errors.push("Слишком много задач. Максимально пять.");
+                    }
+                } else {
+                    if(!this.name) this.errors.push("Требуется название!");
+                    if(!this.tasks) this.errors.push("Требуются задачи!");
+                }
             }
         }
     }
