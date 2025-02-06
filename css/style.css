@@ -1,0 +1,81 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: grey;
+}
+
+.newApplication {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 25%;
+    background-color: rgba( 255, 255, 255, 0.8);
+    border-radius: 20px;
+    border: 2px solid yellow;
+    margin-top: 3%;
+    margin-left: 5%;
+}
+
+.newApplication > h2 {
+    font-size: 25pt;
+    margin-bottom: 5%;
+}
+
+.application-form {
+    border: 2px solid black;
+    padding: 4%;
+    border-radius: 10px;
+    width: 70%;
+}
+
+.application-form > p:nth-of-type(2) {
+    display: flex;
+    align-items: center;
+}
+
+input, textarea {
+    padding: 2%;
+    background-color: khaki;
+}
+
+input[type="submit"] {
+    background-color: khaki;
+    border-radius: 5px;
+    width: 50%;
+}
+
+input[type="submit"]:active {
+    background-color: goldenrod;
+}
+
+.application-form > p:not(p:nth-of-type(3),p:nth-of-type(4)){
+    margin-bottom: 8%;
+}
+
+.application-form > p:nth-of-type(4) {
+    margin-top: 3%;
+}
+
+.application-form > p:nth-of-type(4) > b {
+    color: red;
+}
+
+.application-form > p:nth-of-type(4) > ul > li {
+    margin-left: 3%;
+    color: red;
+}
+
+.application-div {
+    margin: 10%;
+    padding: 5%;
+    background-color:khaki;
+    border-radius: 20px;
+    border: 1px solid black;
+}
+
+.application-div > ul > div {
+    margin-bottom: 5%;
+}

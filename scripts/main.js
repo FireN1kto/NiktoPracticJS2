@@ -2,10 +2,8 @@ Vue.component('new-application', {
     template : `
     <div class="newApplication">
         <h2>Новые заявки</h2>
-        <div>
-            <createApplication @application-submitted="addApplication"></createApplication>
-            <Applications :applications="applications"></Applications>
-        </div>
+        <createApplication @application-submitted="addApplication"></createApplication>
+        <Applications :applications="applications"></Applications>
     </div>
     `,
     data() {
@@ -31,7 +29,7 @@ Vue.component('createApplication', {
 
         <p>
             <label for="tasks">Задачи:</label>
-            <textarea id="tasks" v-model="tasks"></textarea>
+            <textarea id="tasks" v-model="tasks" placeholder="Перечисли задачи через заяптую"></textarea>
         </p>
 
         <p>
@@ -58,7 +56,7 @@ Vue.component('createApplication', {
             if(this.name && this.tasks) {
                 let application = {
                     name: this.name,
-                    tasks: this.tasks.split('\n').filter(task => task.trim() !== '')
+                    tasks: this.tasks.split(',').filter(task => task.trim() !== '')
                 };
                 this.$emit('application-submitted', application)
                 this.name = null;
