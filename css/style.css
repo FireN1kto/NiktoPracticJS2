@@ -97,12 +97,26 @@ input[type="submit"]:active {
     color: red;
 }
 
-.application-div {
-    margin: 10%;
+.noneApplications {
+    margin: 10% 10% 10% 0;
+    padding: 15%;
+    background-color:khaki;
+    border-radius: 20px;
+    border: 1px solid black;
+    width: 100%;
+}
+
+.application-div > ul > div {
+    margin: 13% 13% 13% 0;
     padding: 5%;
     background-color:khaki;
     border-radius: 20px;
     border: 1px solid black;
+    width: 90%;
+}
+
+.application-div > ul > div > ul > li {
+    margin-left: 5%;
 }
 
 .application-div > ul > div {
@@ -129,12 +143,17 @@ input[type="submit"]:active {
     border: 1px solid black;
 }
 
-.filtered-applications > ul {
-    margin: 13%;
+.filtered-applications > ul > div {
+    margin: 13% 13% 13% 0;
     padding: 5%;
     background-color:khaki;
     border-radius: 20px;
     border: 1px solid black;
+    width: 90%;
+}
+
+.filtered-applications > ul > div > ul > li {
+    margin-left: 5%;
 }
 
 .filtered-applications > h2 {
@@ -165,10 +184,22 @@ input[type="submit"]:active {
     font-size: 25pt;
 }
 
-.completed-applications > ul {
-    margin: 13%;
+.completed-applications > ul > div {
+    margin: 13% 13% 13% 0;
     padding: 5%;
     background-color:khaki;
     border-radius: 20px;
     border: 1px solid black;
+    width: 90%;
+}
+
+.completed-applications > ul > div > ul > li {
+    margin-left: 5%;
+}
+
+.delete {
+    border-radius: 20px;
+    width: 50%;
+    margin-top: 5%;
+    margin-left: 20%;
 }

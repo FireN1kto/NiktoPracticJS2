@@ -13,6 +13,7 @@ Vue.component('application', {
                 :applications="applications" 
                 :isEditing="isEditing" 
                 :checked-tasks.sync="checkedTasks"
+                :remove-application="removeApplication"
                 @update-checked-tasks="updateCheckedTasks"
                 @update-application="updateApplication"
             ></Applications>
@@ -21,12 +22,14 @@ Vue.component('application', {
             :applications="filteredApplications" 
             :isEditing="isEditing" 
             :checked-tasks="checkedTasks"
+            :remove-application="removeApplication"
             @update-application="updateApplication"
             @update-checked-tasks="updateCheckedTasks"
         ></FilteredApplications>
         <CompletedApplications 
             :applications="completedApplications" 
             :checked-tasks="checkedTasks"
+            :remove-application="removeApplication"
         ></CompletedApplications>
     </div>
 
@@ -40,7 +43,8 @@ Vue.component('application', {
             isEditing: false,
             checkedTasks: {},
             isFirstColumnLocked: false,
-            maxFilteredApplications: 5 
+            maxFilteredApplications: 5,
+            selectedApplications: {}
         }
     },
     methods: {
@@ -148,10 +152,37 @@ Vue.component('application', {
                 this.checkedTasks = data.checkedTasks || {};
                 this.isFirstColumnLocked = data.isFirstColumnLocked || false;
             }
+        },
+        onTaskChange(application, index) {
+            // Отслеживаем выбор всей заявки
+            if (!this.selectedApplications[application.name]) {
+                this.$set(this.selectedApplications, application.name, false);
+            }
+            this.selectedApplications[application.name] = !this.selectedApplications[application.name];
+
+            // Обновляем состояние задач
+            if (!this.checkedTasks[application.name]) {
+                this.$set(this.checkedTasks, application.name, { tasks: {} });
+            }
+            if (!this.checkedTasks[application.name].tasks) {
+                this.$set(this.checkedTasks[application.name], "tasks", {});
+            }
+            const isChecked = !this.checkedTasks[application.name].tasks[index];
+            this.$set(this.checkedTasks[application.name].tasks, index, isChecked);
+
+            this.$emit('update-checked-tasks', { ...this.checkedTasks });
+            this.$emit('update-application', application);
+        },
+        removeApplication(applicationName) {
+            this.applications = this.applications.filter(app => app.name !== applicationName);
+            this.filteredApplications = this.filteredApplications.filter(app => app.name !== applicationName);
+            this.completedApplications = this.completedApplications.filter(app => app.name !== applicationName);
+            delete this.checkedTasks[applicationName];
+            this.saveToLocalStorage();
         }
     },
     created() {
-        this.loadFromLocalStorage();
+            this.loadFromLocalStorage();
     }
 })
 
@@ -236,6 +267,10 @@ Vue.component('Applications', {
         isFirstColumnLocked: {
             type: Boolean,
             default: false
+        },
+        removeApplication: {
+            type: Function,
+            required: true
         }
     },
     template: `
@@ -258,6 +293,7 @@ Vue.component('Applications', {
                         >{{ task }}
                     </p>
                 </ul>
+                <button @click="removeApplication(application.name)" class="delete"><img src="img/delete.png" alt="delete"></button>
             </div>
         </ul>
     </div>
@@ -288,6 +324,10 @@ Vue.component('FilteredApplications', {
         checkedTasks: {
             type: Object,
             default: () => {}
+        },
+        removeApplication: {
+            type: Function,
+            required: true
         }
     },
     template: `
@@ -311,6 +351,7 @@ Vue.component('FilteredApplications', {
                         >{{ task }}
                     </p>
                 </ul>
+                <button @click="removeApplication(application.name)" class="delete"><img src="img/delete.png" alt="delete"></button>
             </div>
         </ul>
     </div>
@@ -341,6 +382,10 @@ Vue.component('CompletedApplications', {
         checkedTasks: {
             type: Object,
             default: () => {}
+        },
+        removeApplication: {
+            type: Function,
+            required: true
         }
     },
     template: `
@@ -348,13 +393,14 @@ Vue.component('CompletedApplications', {
         <h2>Полностью выполненные заявки:</h2>
         <p v-if="!applications.length">Нет полностью выполненных заявок.</p>
         <ul v-else>
-            <li v-for="application in applications" :key="application.name">
+            <div v-for="application in applications" :key="application.name">
                 <h3>{{ application.name }}</h3>
                 <p>Время завершения: {{ getCompletionTime(application) }}</p>
                 <ul>
                     <li v-for="(task, index) in application.tasks" :key="'t' + index">{{ task }}</li>
                 </ul>
-            </li>
+                <button @click="removeApplication(application.name)" class="delete"><img src="img/delete.png" alt="delete"></button>
+            </div>
         </ul>
     </div>
     `,
