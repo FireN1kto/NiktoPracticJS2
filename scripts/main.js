@@ -1,24 +1,32 @@
 Vue.component('application', {
     template : `
-    <div class="newApplication">
-        <h2>Новые заявки</h2>
-        <createApplication @application-submitted="addApplication"></createApplication>
-        <Applications :applications="applications"></Applications>
+    <div class="application">
+        <button v-if="!showForm" @click="openForm" class="create"><img src="img/create.png" alt="create"></button>
+        <div class="newApplication">
+            <h2>Новые заявки</h2>
+            <createApplication v-if="showForm" @application-submitted="addApplication"></createApplication>
+            <Applications :applications="applications"></Applications>
+        </div>
     </div>
 
     `,
     data() {
         return {
-            applications: []
+            applications: [],
+            showForm: false,
         }
     },
     methods: {
         addApplication(application){
             if (this.applications.length < 3) {
                 this.applications.push(application);
+                this.showForm = false;
             } else {
                 alert("Достигнуто максимальное количество заявок!");
             }
+        },
+        openForm() {
+            this.showForm = true;
         }
     }
 })
@@ -72,6 +80,7 @@ Vue.component('createApplication', {
                         this.tasks = "";
                         this.errors = [];
                     }else if (tasksArray.length < 3){
+
                         if (!this.errors.includes("Слишком мало задач")) 
                             this.errors.push("Слишком мало задач. Требуется не менее трёх.");
                     }else {

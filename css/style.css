@@ -7,6 +7,11 @@ body {
     background-color: grey;
 }
 
+.application {
+    display: flex;
+    align-items: center;
+}
+
 .newApplication {
     display: flex;
     flex-direction: column;
@@ -16,7 +21,14 @@ body {
     border-radius: 20px;
     border: 2px solid yellow;
     margin-top: 3%;
-    margin-left: 5%;
+    margin-left: 6%;
+}
+
+.create {
+    margin-left: 1%;
+    margin-top: 3%;
+    border-radius: 5px;
+    border: none;
 }
 
 .newApplication > h2 {
