@@ -21,7 +21,7 @@ body {
     border-radius: 20px;
     border: 2px solid yellow;
     margin-top: 3%;
-    margin-left: 4%;
+    margin-left: 3%;
 }
 
 .menu {
@@ -113,7 +113,7 @@ input[type="submit"]:active {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 25%;
+    width: 30%;
     background-color: rgba( 255, 255, 255, 0.8);
     border-radius: 20px;
     border: 2px solid yellow;
@@ -130,6 +130,42 @@ input[type="submit"]:active {
 }
 
 .filtered-applications > ul {
+    margin: 13%;
+    padding: 5%;
+    background-color:khaki;
+    border-radius: 20px;
+    border: 1px solid black;
+}
+
+.filtered-applications > h2 {
+    font-size: 25pt;
+}
+
+.completed-applications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+    background-color: rgba( 255, 255, 255, 0.8);
+    border-radius: 20px;
+    border: 2px solid yellow;
+    margin-top: 3%;
+    margin-left: 2%;
+}
+
+.completed-applications > p {
+    margin: 13%;
+    padding: 5%;
+    background-color:khaki;
+    border-radius: 20px;
+    border: 1px solid black;
+}
+
+.completed-applications > h2 {
+    font-size: 25pt;
+}
+
+.completed-applications > ul {
     margin: 13%;
     padding: 5%;
     background-color:khaki;

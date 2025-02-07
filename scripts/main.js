@@ -24,6 +24,10 @@ Vue.component('application', {
             @update-application="updateApplication"
             @update-checked-tasks="updateCheckedTasks"
         ></FilteredApplications>
+        <CompletedApplications 
+            :applications="completedApplications" 
+            :checked-tasks="checkedTasks"
+        ></CompletedApplications>
     </div>
 
     `,
@@ -31,6 +35,7 @@ Vue.component('application', {
         return {
             applications: [],
             filteredApplications: [],
+            completedApplications: [],
             showForm: false,
             isEditing: false,
             checkedTasks: {}
@@ -60,12 +65,12 @@ Vue.component('application', {
             this.isEditing = true;
             this.applications.forEach(application => {
                 if (!this.checkedTasks[application.name]) {
-                    this.$set(this.checkedTasks, application.name, {});
+                    this.$set(this.checkedTasks, application.name, { tasks: {} });
                 }
             });
             this.filteredApplications.forEach(application => {
                 if (!this.checkedTasks[application.name]) {
-                    this.$set(this.checkedTasks, application.name, {});
+                    this.$set(this.checkedTasks, application.name, { tasks: {} });
                 }
             });
         },
@@ -73,24 +78,24 @@ Vue.component('application', {
             this.isEditing = false;
         },
         updateApplication(application) {
-            console.log("Метод updateApplication вызван для заявки:", application.name);
-            console.log("Текущие checkedTasks:", this.checkedTasks);
-    
             const tasks = application.tasks;
-            const checkedCount = Object.values(this.checkedTasks[application.name] || {}).filter(checked => checked).length;
-            console.log("Выполнено задач:", checkedCount, "из", tasks.length);
+            const checkedCount = Object.values(this.checkedTasks[application.name]?.tasks || {}).filter(checked => checked).length;
     
-            const isHalfCompleted = checkedCount / tasks.length >= 0.5;
-            console.log("Выполнено больше половины?", isHalfCompleted);
-    
-            if (isHalfCompleted) {
-                console.log("Перемещаем заявку во второй блок");
+            if (checkedCount === tasks.length) {
+                // Все задачи выполнены → перемещаем в третий блок
+                this.$set(this.checkedTasks[application.name], "lastCheckedTime", new Date().toISOString());
+                if (!this.completedApplications.find(app => app.name === application.name)) {
+                    this.completedApplications.push(application);
+                }
+                this.filteredApplications = this.filteredApplications.filter(app => app.name !== application.name);
+            } else if (checkedCount / tasks.length >= 0.5) {
+                // Выполнено больше половины задач → перемещаем во второй блок
                 if (!this.filteredApplications.find(app => app.name === application.name)) {
                     this.filteredApplications.push(application);
                 }
                 this.applications = this.applications.filter(app => app.name !== application.name);
             } else {
-                console.log("Возвращаем заявку в первый блок");
+                // Меньше половины задач выполнено → оставляем в первом блоке
                 if (!this.applications.find(app => app.name === application.name)) {
                     this.applications.push(application);
                 }
@@ -100,14 +105,17 @@ Vue.component('application', {
         updateCheckedTasks(updatedCheckedTasks) {
             for (const appName in updatedCheckedTasks) {
                 if (!this.checkedTasks[appName]) {
-                    this.$set(this.checkedTasks, appName, {});
+                    this.$set(this.checkedTasks, appName, { tasks: {} });
                 }
-                for (const taskIndex in updatedCheckedTasks[appName]) {
-                    this.$set(this.checkedTasks[appName], taskIndex, updatedCheckedTasks[appName][taskIndex]);
+                for (const taskIndex in updatedCheckedTasks[appName].tasks) {
+                    if (!this.checkedTasks[appName].tasks) {
+                        this.$set(this.checkedTasks[appName], "tasks", {});
+                    }
+                    this.$set(this.checkedTasks[appName].tasks, taskIndex, updatedCheckedTasks[appName].tasks[taskIndex]);
                 }
             }
         }
-    },
+    }
 })
 
 
@@ -199,12 +207,12 @@ Vue.component('Applications', {
                     <li v-for="(task, index) in application.tasks" :key="index">{{ task }}</li>
                 </ul>
                 <ul v-else>
-                    <p v-for="(task, index) in application.tasks" :key="'t'+index">
+                    <p v-for="(task, index) in application.tasks" :key="index">
                         <input 
                             type="checkbox" 
                             :id="'t'+index" 
                             :value="task"
-                            :checked="checkedTasks[application.name] && checkedTasks[application.name][index]"
+                            :checked="checkedTasks[application.name]?.tasks?.[index]"
                             @change="onTaskChange(application, index)"
                         >{{ task }}
                     </p>
@@ -215,8 +223,14 @@ Vue.component('Applications', {
     `,
     methods: {
         onTaskChange(application, index) {
-            const isChecked = !this.checkedTasks[application.name][index];
-            this.$set(this.checkedTasks[application.name], index, isChecked);
+            if (!this.checkedTasks[application.name]) {
+                this.$set(this.checkedTasks, application.name, { tasks: {} });
+            }
+            if (!this.checkedTasks[application.name].tasks) {
+                this.$set(this.checkedTasks[application.name], "tasks", {});
+            }
+            const isChecked = !this.checkedTasks[application.name].tasks[index];
+            this.$set(this.checkedTasks[application.name].tasks, index, isChecked);
             this.$emit('update-checked-tasks', { ...this.checkedTasks });
             this.$emit('update-application', application);
         }
@@ -243,15 +257,15 @@ Vue.component('FilteredApplications', {
             <div v-for="application in applications" :key="application.name">
                 <p class="applicationName">{{ application.name }}</p>
                 <ul v-if="!isEditing">
-                    <li v-for="(task, index) in application.tasks" :key="'t'+index">{{ task }}</li>
+                    <li v-for="(task, index) in application.tasks" :key="index">{{ task }}</li>
                 </ul>
                 <ul v-else>
-                    <p v-for="(task, index) in application.tasks" :key="'t'+index">
+                    <p v-for="(task, index) in application.tasks" :key="index">
                         <input 
                             type="checkbox" 
                             :id="'t'+index" 
                             :value="task"
-                            :checked="checkedTasks[application.name] && checkedTasks[application.name][index]"
+                            :checked="checkedTasks[application.name]?.tasks?.[index]"
                              @change="onTaskChange(application, index)"
                         >{{ task }}
                     </p>
@@ -262,13 +276,53 @@ Vue.component('FilteredApplications', {
     `,
     methods: {
         onTaskChange(application, index) {
-            const isChecked = !this.checkedTasks[application.name][index];
-            this.$set(this.checkedTasks[application.name], index, isChecked);
+            if (!this.checkedTasks[application.name]) {
+                this.$set(this.checkedTasks, application.name, { tasks: {} });
+            }
+            if (!this.checkedTasks[application.name].tasks) {
+                this.$set(this.checkedTasks[application.name], "tasks", {});
+            }
+            const isChecked = !this.checkedTasks[application.name].tasks[index];
+            this.$set(this.checkedTasks[application.name].tasks, index, isChecked);
             this.$emit('update-checked-tasks', { ...this.checkedTasks });
             this.$emit('update-application', application);
         }
     }
 })
+
+
+Vue.component('CompletedApplications', {
+    props: {
+        applications: {
+            type: Array,
+            required: true
+        },
+        checkedTasks: {
+            type: Object,
+            default: () => {}
+        }
+    },
+    template: `
+    <div class="completed-applications">
+        <h2>Полностью выполненные заявки:</h2>
+        <p v-if="!applications.length">Нет полностью выполненных заявок.</p>
+        <ul v-else>
+            <li v-for="application in applications" :key="application.name">
+                <h3>{{ application.name }}</h3>
+                <p>Время завершения: {{ getCompletionTime(application) }}</p>
+                <ul>
+                    <li v-for="(task, index) in application.tasks" :key="'t' + index">{{ task }}</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    `,
+    methods: {
+        getCompletionTime(application) {
+            return this.checkedTasks[application.name]?.lastCheckedTime || "Время не указано";
+        }
+    }
+});
 
 
 let app = new Vue ({
