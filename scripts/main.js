@@ -56,6 +56,7 @@ Vue.component('application', {
             if (this.applications.length < 3) {
                 this.applications.push(application);
                 this.showForm = false;
+                this.saveToLocalStorage();
             } else {
                 alert("Достигнуто максимальное количество заявок!");
             }
@@ -111,6 +112,7 @@ Vue.component('application', {
                 this.filteredApplications = this.filteredApplications.filter(app => app.name !== application.name);
             }
             this.isFirstColumnLocked = this.filteredApplications.length >= this.maxFilteredApplications;
+            this.saveToLocalStorage();
         },
         updateCheckedTasks(updatedCheckedTasks) {
             for (const appName in updatedCheckedTasks) {
@@ -124,7 +126,32 @@ Vue.component('application', {
                     this.$set(this.checkedTasks[appName].tasks, taskIndex, updatedCheckedTasks[appName].tasks[taskIndex]);
                 }
             }
+            this.saveToLocalStorage();
+        },
+        saveToLocalStorage() {
+            const data = {
+                applications: this.applications,
+                filteredApplications: this.filteredApplications,
+                completedApplications: this.completedApplications,
+                checkedTasks: this.checkedTasks,
+                isFirstColumnLocked: this.isFirstColumnLocked
+            };
+            localStorage.setItem('applicationsData', JSON.stringify(data));
+        },
+        loadFromLocalStorage() {
+            const savedData = localStorage.getItem('applicationsData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                this.applications = data.applications || [];
+                this.filteredApplications = data.filteredApplications || [];
+                this.completedApplications = data.completedApplications || [];
+                this.checkedTasks = data.checkedTasks || {};
+                this.isFirstColumnLocked = data.isFirstColumnLocked || false;
+            }
         }
+    },
+    created() {
+        this.loadFromLocalStorage();
     }
 })
 
