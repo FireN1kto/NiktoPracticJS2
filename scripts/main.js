@@ -38,7 +38,9 @@ Vue.component('application', {
             completedApplications: [],
             showForm: false,
             isEditing: false,
-            checkedTasks: {}
+            checkedTasks: {},
+            isFirstColumnLocked: false,
+            maxFilteredApplications: 5 
         }
     },
     methods: {
@@ -90,6 +92,13 @@ Vue.component('application', {
                 this.filteredApplications = this.filteredApplications.filter(app => app.name !== application.name);
             } else if (checkedCount / tasks.length >= 0.5) {
                 // Выполнено больше половины задач → перемещаем во второй блок
+                if (this.filteredApplications.length >= this.maxFilteredApplications) {
+                    // Если достигнут максимум карточек во втором столбце, блокируем первый столбец
+                    this.isFirstColumnLocked = true;
+                    alert("Достигнуто максимальное количество заявок во втором блоке!");
+                    return; // Не перемещаем заявку, если лимит достигнут
+                }
+
                 if (!this.filteredApplications.find(app => app.name === application.name)) {
                     this.filteredApplications.push(application);
                 }
@@ -101,6 +110,7 @@ Vue.component('application', {
                 }
                 this.filteredApplications = this.filteredApplications.filter(app => app.name !== application.name);
             }
+            this.isFirstColumnLocked = this.filteredApplications.length >= this.maxFilteredApplications;
         },
         updateCheckedTasks(updatedCheckedTasks) {
             for (const appName in updatedCheckedTasks) {
@@ -195,6 +205,10 @@ Vue.component('Applications', {
         checkedTasks: {
             type: Object,
             default: () => {}
+        },
+        isFirstColumnLocked: {
+            type: Boolean,
+            default: false
         }
     },
     template: `
