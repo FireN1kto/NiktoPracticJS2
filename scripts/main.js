@@ -319,7 +319,15 @@ Vue.component('CompletedApplications', {
     `,
     methods: {
         getCompletionTime(application) {
-            return this.checkedTasks[application.name]?.lastCheckedTime || "Время не указано";
+            const lastCheckedTime = this.checkedTasks[application.name]?.lastCheckedTime;
+            if (!lastCheckedTime) return "Время не указано";
+            
+            const date = new Date(lastCheckedTime);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const year = date.getFullYear();
+
+            return `${hours}:${minutes}-${year}`;
         }
     }
 });
