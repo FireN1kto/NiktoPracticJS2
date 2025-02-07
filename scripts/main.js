@@ -1,11 +1,14 @@
 Vue.component('application', {
     template : `
     <div class="application">
-        <button v-if="!showForm" @click="openForm" class="create"><img src="img/create.png" alt="create"></button>
+        <div class="menu">
+            <button v-if="!showForm" @click="openForm" class="create"><img src="img/create.png" alt="Создать"></button>
+            <button @click="editApplication" class="redact"><img src="img/redact.png" alt="Редактировать"></button>
+        </div>
         <div class="newApplication">
             <h2>Новые заявки</h2>
             <createApplication v-if="showForm" @application-submitted="addApplication"></createApplication>
-            <Applications :applications="applications"></Applications>
+            <Applications :applications="applications" :isEditing="isEditing"></Applications>
         </div>
     </div>
 
@@ -14,6 +17,8 @@ Vue.component('application', {
         return {
             applications: [],
             showForm: false,
+            isEditing: false,
+            checkedTasks: {}
         }
     },
     methods: {
@@ -27,6 +32,12 @@ Vue.component('application', {
         },
         openForm() {
             this.showForm = true;
+        },
+        editApplication() {
+            this.isEditing = true;
+        },
+        stopEditing() {
+            this.isEditing = false;
         }
     }
 })
@@ -88,8 +99,12 @@ Vue.component('createApplication', {
                             this.errors.push("Слишком много задач. Максимально пять.");
                     }
                 } else {
-                    if(!this.name) this.errors.push("Требуется название!");
-                    if(!this.tasks) this.errors.push("Требуются задачи!");
+                    if(!this.name) 
+                        if(this.errors.includes("Требуется название!"))
+                            this.errors.push("Требуется название!")
+                    if(!this.tasks) 
+                        if(this.errors.includes("Требуются задачи!"))
+                            this.errors.push("Требуются задачи!")
                 }
             }
         }
@@ -102,7 +117,8 @@ Vue.component('Applications', {
         applications: {
             type: Array,
             requared: false
-        }
+        },
+        isEditing: Boolean
     },
     template: `
     <div class="application-div">
@@ -110,8 +126,13 @@ Vue.component('Applications', {
             <p v-if="!applications.length" class="noneApplications">Здесь ещё нет заявок.</p>
             <div v-for="application in applications" :key="application.name">
                 <p class="applicationName">{{ application.name }}</p>
-                <ul>
+                <ul v-if="!isEditing">
                     <li v-for="(task, index) in application.tasks" :key="index">{{ task }}</li>
+                </ul>
+                <ul v-else>
+                    <p v-for="(task, index) in application.tasks" :key="'t'+index">
+                        <input type="checkbox" :id="'t'+index" :value="task">{{ task }}
+                    </p>
                 </ul>
             </div>
         </ul>
