@@ -4,12 +4,14 @@ Vue.component('application', {
         <div class="menu">
             <button v-if="!showForm" @click="openForm" class="create"><img src="img/create.png" alt="Создать"></button>
             <button @click="editApplication" class="redact"><img src="img/redact.png" alt="Редактировать"></button>
+            <button @click="stopEditing" class="stop"><img src="img/stop-redact.png" alt="Остановить"></button>
         </div>
         <div class="newApplication">
             <h2>Новые заявки</h2>
             <createApplication v-if="showForm" @application-submitted="addApplication"></createApplication>
-            <Applications :applications="applications" :isEditing="isEditing"></Applications>
+            <Applications :applications="applications" :isEditing="isEditing" :checked-tasks.sync="checkedTasks"></Applications>
         </div>
+        <FilteredApplications :applications="filteredApplications"></FilteredApplications>
     </div>
 
     `,
@@ -35,9 +37,29 @@ Vue.component('application', {
         },
         editApplication() {
             this.isEditing = true;
+            this.applications.forEach(application => {
+                if (!this.checkedTasks[application.name]) {
+                    this.$set(this.checkedTasks, application.name, {});
+                }
+            });
         },
         stopEditing() {
             this.isEditing = false;
+        }
+    },
+    computed: {
+        filteredApplications() {
+            return this.applications.filter(application => {
+                const tasks = application.tasks;
+                
+                if (!this.checkedTasks[application.name]) return false;
+                
+                const checkedCount = Object.values(this.checkedTasks[application.name]).filter(checked => checked).length;
+                return checkedCount / tasks.length >= 0.5;
+            });
+        },
+        unfilteredApplications() {
+            return this.applications.filter(application => !this.filteredApplications.includes(application));
         }
     }
 })
@@ -118,7 +140,8 @@ Vue.component('Applications', {
             type: Array,
             requared: false
         },
-        isEditing: Boolean
+        isEditing: Boolean,
+        checkedTasks: Object
     },
     template: `
     <div class="application-div">
@@ -131,7 +154,42 @@ Vue.component('Applications', {
                 </ul>
                 <ul v-else>
                     <p v-for="(task, index) in application.tasks" :key="'t'+index">
-                        <input type="checkbox" :id="'t'+index" :value="task">{{ task }}
+                        <input 
+                            type="checkbox" 
+                            :id="'t'+index" 
+                            :value="task"
+                            @change="$set(checkedTasks[application.name], index, $event.target.checked)"
+                            >{{ task }}
+                    </p>
+                </ul>
+            </div>
+        </ul>
+    </div>
+    `
+})
+
+Vue.component('FilteredApplications', {
+    props: {
+        applications: {
+            type: Array,
+            requared: true
+        },
+        isEditing: Boolean
+    },
+    template: `
+    <div class="filtered-applications">
+        <h2>Заявки выполненные на половину:</h2>
+        <p v-if="!applications.length">Нет подходящих заявок.</p>
+        <ul v-else>
+            <div v-for="application in applications" :key="application.name">
+                <p class="applicationName">{{ application.name }}</p>
+                <ul v-if="!isEditing">
+                    <li v-for="(task, index) in application.tasks" :key="'t'+index">{{ task }}</li>
+                </ul>
+                <ul v-else>
+                    <p v-for="(task, index) in application.tasks" :key="'t'+index">-->
+                        {{ task }}
+                        <!--<input type='checkbox' />-->
                     </p>
                 </ul>
             </div>
