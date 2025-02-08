@@ -106,13 +106,17 @@ input[type="submit"]:active {
     width: 100%;
 }
 
+.application-div {
+    width: 40%;
+}
+
 .application-div > ul > div {
     margin: 13% 13% 13% 0;
     padding: 5%;
     background-color:khaki;
     border-radius: 20px;
     border: 1px solid black;
-    width: 90%;
+    width: 100%;
 }
 
 .application-div > ul > div > ul > li {
@@ -143,13 +147,17 @@ input[type="submit"]:active {
     border: 1px solid black;
 }
 
+.filtered-applications > ul {
+    width: 40%;
+}
+
 .filtered-applications > ul > div {
     margin: 13% 13% 13% 0;
     padding: 5%;
     background-color:khaki;
     border-radius: 20px;
     border: 1px solid black;
-    width: 90%;
+    width: 80%;
 }
 
 .filtered-applications > ul > div > ul > li {

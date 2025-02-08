@@ -195,9 +195,13 @@ Vue.component('createApplication', {
             <input id="application" v-model="name" placeholder="Пройти бося Оленя в Valheim">
         </p>
 
+        <div v-for="(task, index) in tasks" :key="index">
+            <input v-model="tasks[index]" placeholder="Задача" />
+            <button @click="removeTask(index)">Удалить задачу</button>
+        </div>
+       
         <p>
-            <label for="tasks">Задачи:</label>
-            <textarea id="tasks" v-model="tasks" placeholder="Перечисли задачи через заяптую"></textarea>
+            <button @click="addTask">Добавить задачу</button>
         </p>
 
         <p>
@@ -215,22 +219,28 @@ Vue.component('createApplication', {
     data () {
         return {
             name: null,
-            tasks: "",
+            tasks: [],
             errors: []
         }
     },
     methods: {
+        addTask() {
+            this.tasks.push(''); // Добавляем новое пустое поле для задачи
+        },
+        removeTask(index) {
+            this.tasks.splice(index, 1); // Удаляем задачу по индексу
+        },
         onSubmit() {
             this.errors = [];
             if (!this.name) {
                 this.errors.push("Требуется название!");
             }
-            if (!this.tasks) {
+            if (this.tasks.length === 0 || this.tasks.every(task => task.trim() === '')) {
                 this.errors.push("Требуются задачи!");
             }
 
             if (this.errors.length === 0) {
-                let tasksArray = this.tasks.split(',').map(task => task.trim()).filter(task => task !== '');
+                const tasksArray = this.tasks.filter(task => task.trim() !== '');
                 if (tasksArray.length < 3) {
                     this.errors.push("Слишком мало задач. Требуется не менее трёх.");
                 } else if (tasksArray.length > 5) {
