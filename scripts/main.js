@@ -8,7 +8,11 @@ Vue.component('application', {
         </div>
         <div class="newApplication">
             <h2>Новые заявки</h2>
-            <createApplication v-if="showForm" @application-submitted="addApplication" ></createApplication>
+            <modal :show="showForm" @close="closeForm">
+                <div class="modal-content">
+                    <createApplication @application-submitted="addApplication" />
+                </div>
+            </modal>
             <Applications 
                 :applications="applications" 
                 :isEditing="isEditing" 
@@ -67,6 +71,9 @@ Vue.component('application', {
         },
         openForm() {
             this.showForm = true;
+        },
+        closeForm() {
+            this.showForm = false;
         },
         editApplication() {
             this.isEditing = true;
@@ -195,13 +202,13 @@ Vue.component('createApplication', {
             <input id="application" v-model="name" placeholder="Пройти бося Оленя в Valheim">
         </p>
 
-        <div v-for="(task, index) in tasks" :key="index">
-            <input v-model="tasks[index]" placeholder="Задача" />
-            <button @click="removeTask(index)">Удалить задачу</button>
+        <div v-for="(task, index) in tasks" :key="index" class="info-task">
+            <textarea v-model="tasks[index]" placeholder="Задача" class="task" />
+            <button @click="removeTask(index)" class="delete-task">Удалить задачу</button>
         </div>
        
         <p>
-            <button @click="addTask">Добавить задачу</button>
+            <button @click="addTask" class="add-task">Добавить задачу</button>
         </p>
 
         <p>
@@ -427,7 +434,28 @@ Vue.component('CompletedApplications', {
             return `${hours}:${minutes}-${year}`;
         }
     }
-});
+})
+
+
+Vue.component('modal',{
+    props: {
+        show: {
+            type: Boolean,
+            default: false
+        }
+    },
+    template: `
+    <div v-if="show" class="modal-overlay">
+        <span @click="closeModal" class="close">&times;</span>
+        <slot></slot>
+    </div>
+    `,
+    methods: {
+        closeModal() {
+            this.$emit('close');
+        }
+    },
+})
 
 
 let app = new Vue ({
