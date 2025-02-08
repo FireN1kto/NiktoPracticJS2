@@ -5,6 +5,7 @@ Vue.component('application', {
             <button v-if="!showForm" @click="openForm" class="create"><img src="img/create.png" alt="Создать"></button>
             <button @click="editApplication" class="redact"><img src="img/redact.png" alt="Редактировать"></button>
             <button @click="stopEditing" class="stop"><img src="img/stop-redact.png" alt="Остановить"></button>
+            <input type="text" v-model="searchQuery" placeholder="Поиск по названию заявки..." />
         </div>
         <div class="newApplication">
             <h2>Новые заявки</h2>
@@ -35,6 +36,23 @@ Vue.component('application', {
             :checked-tasks="checkedTasks"
             :remove-application="removeApplication"
         ></CompletedApplications>
+        <div>
+            <ul>
+                <li v-for="app in filteredNewApplications" :key="app.name">
+                    {{ app.name }}
+                </li>
+            </ul>
+            <ul>
+                <li v-for="app in filteredFilteredApplications" :key="app.name">
+                    {{ app.name }}
+                </li>
+            </ul>
+             <ul>
+                <li v-for="app in filteredCompletedApplications" :key="app.name">
+                    {{ app.name }}
+                </li>
+            </ul>
+        </div>
     </div>
 
     `,
@@ -48,7 +66,8 @@ Vue.component('application', {
             checkedTasks: {},
             isFirstColumnLocked: false,
             maxFilteredApplications: 5,
-            selectedApplications: {}
+            selectedApplications: {},
+            searchQuery: ''
         }
     },
     methods: {
@@ -61,7 +80,7 @@ Vue.component('application', {
                 alert("Заявка с таким именем уже существует!");
                 return;
             }
-            if (this.applications.length < 3) {
+            if (this.applications.length < 5) {
                 this.applications.push(application);
                 this.showForm = false;
                 this.saveToLocalStorage();
@@ -186,6 +205,23 @@ Vue.component('application', {
             this.completedApplications = this.completedApplications.filter(app => app.name !== applicationName);
             delete this.checkedTasks[applicationName];
             this.saveToLocalStorage();
+        }
+    },
+    computed: {
+        filteredNewApplications() {
+            return this.applications.filter(app =>
+                app.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+        },
+        filteredFilteredApplications() {
+            return this.filteredApplications.filter(app =>
+                app.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+        },
+        filteredCompletedApplications() {
+            return this.completedApplications.filter(app =>
+                app.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
         }
     },
     created() {
