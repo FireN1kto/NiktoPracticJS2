@@ -5,7 +5,7 @@ Vue.component('application', {
             <button v-if="!showForm" @click="openForm" class="create"><img src="img/create.png" alt="Создать"></button>
             <button @click="editApplication" class="redact"><img src="img/redact.png" alt="Редактировать"></button>
             <button @click="stopEditing" class="stop"><img src="img/stop-redact.png" alt="Остановить"></button>
-            <input type="text" v-model="searchQuery" placeholder="Поиск по названию заявки..." />
+            <input type="text" class="search" v-model="searchQuery" placeholder="Поиск по названию" />
         </div>
         <div class="newApplication">
             <h2>Новые заявки</h2>
@@ -36,22 +36,18 @@ Vue.component('application', {
             :checked-tasks="checkedTasks"
             :remove-application="removeApplication"
         ></CompletedApplications>
-        <div>
-            <ul>
-                <li v-for="app in filteredNewApplications" :key="app.name">
-                    {{ app.name }}
-                </li>
-            </ul>
-            <ul>
-                <li v-for="app in filteredFilteredApplications" :key="app.name">
-                    {{ app.name }}
-                </li>
-            </ul>
-             <ul>
-                <li v-for="app in filteredCompletedApplications" :key="app.name">
-                    {{ app.name }}
-                </li>
-            </ul>
+        <div class="search-result">
+            <h2>Результат поиска</h2>
+            <div v-if="!searchQuery.trim()" class="none-search">
+                <p>Поиск не начат</p>
+            </div>
+            <div v-for="application in filteredCards" :key="application.name" v-else class="filtered">
+                <h3>{{ application.name }}</h3>
+                <p><strong>Задачи:</strong></p>
+                <ul>
+                    <li v-for="(task, index) in application.tasks" :key="index">{{ task }}</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -208,19 +204,12 @@ Vue.component('application', {
         }
     },
     computed: {
-        filteredNewApplications() {
-            return this.applications.filter(app =>
-                app.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
-        },
-        filteredFilteredApplications() {
-            return this.filteredApplications.filter(app =>
-                app.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
-        },
-        filteredCompletedApplications() {
-            return this.completedApplications.filter(app =>
-                app.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+        filteredCards() {
+            if (!this.searchQuery.trim()) return [];
+
+            const query = this.searchQuery.toLowerCase();
+            return this.applications.filter(application => 
+                application.name.toLowerCase().includes(query)
             );
         }
     },
@@ -234,7 +223,7 @@ Vue.component('createApplication', {
     template: `
     <form class="application-form" @submit.prevent="onSubmit">
         <p>
-            <label for="application">Название заявки:</label>
+            <label for="application">Название заявки</label>
             <input id="application" v-model="name" placeholder="Пройти бося Оленя в Valheim">
         </p>
 
@@ -385,7 +374,7 @@ Vue.component('FilteredApplications', {
     },
     template: `
     <div class="filtered-applications">
-        <h2>Заявки выполненные на половину:</h2>
+        <h2>Заявки выполненные на половину</h2>
         <p v-if="!applications.length">Нет подходящих заявок.</p>
         <ul v-else>
             <div v-for="application in applications" :key="application.name">
@@ -443,7 +432,7 @@ Vue.component('CompletedApplications', {
     },
     template: `
     <div class="completed-applications">
-        <h2>Полностью выполненные заявки:</h2>
+        <h2>Полностью выполненные заявки</h2>
         <p v-if="!applications.length">Нет полностью выполненных заявок.</p>
         <ul v-else>
             <div v-for="application in applications" :key="application.name">
