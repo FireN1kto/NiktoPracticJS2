@@ -257,7 +257,11 @@ Vue.component('createApplication', {
     },
     methods: {
         addTask() {
-            this.tasks.push(''); // Добавляем новое пустое поле для задачи
+            if (this.tasks.length < 5) {
+                this.tasks.push('');
+            } else {
+                alert("Максимальное количество задач достигнуто!");
+            }
         },
         removeTask(index) {
             this.tasks.splice(index, 1); // Удаляем задачу по индексу
@@ -269,6 +273,10 @@ Vue.component('createApplication', {
             }
             if (this.tasks.length === 0 || this.tasks.every(task => task.trim() === '')) {
                 this.errors.push("Требуются задачи!");
+            }
+
+            if (this.tasks.length === 0 || this.tasks.some(task => task.trim() === '')) {
+                this.errors.push("Заполните все задачи или удалите пустые поля!");
             }
 
             if (this.errors.length === 0) {
@@ -284,7 +292,7 @@ Vue.component('createApplication', {
                     };
                     this.$emit('application-submitted', application);
                     this.name = null;
-                    this.tasks = "";
+                    this.tasks = [];
                 }
             }
         }
